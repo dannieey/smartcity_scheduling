@@ -4,18 +4,22 @@ import java.util.*;
 
 public class TopoResult {
     private final List<Integer> order;
-    private final boolean hasCycle;
+    private final boolean isDAG;
 
-    public TopoResult(List<Integer> order, boolean hasCycle) {
+    public TopoResult(List<Integer> order, boolean isDAG) {
         this.order = order;
-        this.hasCycle = hasCycle;
+        this.isDAG = isDAG;
+    }
+
+    public TopoResult(List<Integer> order) {
+        this(order, order != null);
     }
 
     public List<Integer> getOrder() { return order; }
-    public boolean hasCycle() { return hasCycle; }
+    public boolean isDAG() { return isDAG; }
 
-    public void print() {
-        if (hasCycle) System.out.println("Cycle detected!");
-        else System.out.println("Topological order: " + order);
+    @Override
+    public String toString() {
+        return "TopoResult{isDAG=" + isDAG + ", order=" + order + "}";
     }
 }

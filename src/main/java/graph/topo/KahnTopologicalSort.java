@@ -1,28 +1,36 @@
 package graph.topo;
 
+import common.Metrics;
 import java.util.*;
 
 public class KahnTopologicalSort {
-    public static TopoResult sort(Map<Integer, List<Integer>> graph, int n) {
-        int[] indegree = new int[n];
-        for (List<Integer> edges : graph.values()) {
-            for (int v : edges) indegree[v]++;
+
+    public static TopoResult sort(List<List<Integer>> dag, Metrics metrics) {
+        int n = dag.size();
+        int[] inDegree = new int[n];
+        for (int u = 0; u < n; u++) {
+            for (int v : dag.get(u)) inDegree[v]++;
         }
 
-        Queue<Integer> q = new LinkedList<>();
-        for (int i = 0; i < n; i++)
-            if (indegree[i] == 0) q.add(i);
+        Deque<Integer> queue = new ArrayDeque<>();
+        for (int i = 0; i < n; i++) if (inDegree[i] == 0) queue.add(i);
 
-        List<Integer> order = new ArrayList<>();
-        while (!q.isEmpty()) {
-            int u = q.poll();
-            order.add(u);
-            for (int v : graph.getOrDefault(u, Collections.emptyList())) {
-                indegree[v]--;
-                if (indegree[v] == 0) q.add(v);
+        List<Integer> topo = new ArrayList<>();
+        metrics.startTimer();
+        while (!queue.isEmpty()) {
+            metrics.kahnPops++;
+            int u = queue.poll();
+            topo.add(u);
+            for (int v : dag.get(u)) {
+                if (--inDegree[v] == 0) {
+                    metrics.kahnPushes++;
+                    queue.add(v);
+                }
             }
         }
+        metrics.endTimer();
 
-        return new TopoResult(order, order.size() != n);
+        boolean isDAG = topo.size() == n;
+        return new TopoResult(topo, isDAG);
     }
 }

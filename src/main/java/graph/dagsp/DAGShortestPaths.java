@@ -1,38 +1,38 @@
 package graph.dagsp;
 
-import graph.topo.KahnTopologicalSort;
-import graph.topo.TopoResult;
+import common.Metrics;
 import java.util.*;
 
 public class DAGShortestPaths {
-    public static DAGPathResult compute(Map<Integer, List<int[]>> graph, int n, int source) {
-        TopoResult topo = KahnTopologicalSort.sort(convert(graph), n);
-        double[] dist = new double[n];
-        int[] prev = new int[n];
-        Arrays.fill(dist, Double.POSITIVE_INFINITY);
-        Arrays.fill(prev, -1);
+    private final List<List<Edge>> dag;
+    private final Metrics metrics;
+
+    public DAGShortestPaths(List<List<Edge>> dag, Metrics metrics) {
+        this.dag = Objects.requireNonNull(dag);
+        this.metrics = metrics == null ? new Metrics() : metrics;
+    }
+
+    public DAGPathResult shortestPaths(int source, List<Integer> topoOrder) {
+        int n = dag.size();
+        int[] dist = new int[n];
+        int[] parent = new int[n];
+        Arrays.fill(dist, Integer.MAX_VALUE);
+        Arrays.fill(parent, -1);
+        if (source < 0 || source >= n) return new DAGPathResult(dist, parent);
         dist[source] = 0;
 
-        for (int u : topo.getOrder()) {
-            for (int[] edge : graph.getOrDefault(u, Collections.emptyList())) {
-                int v = edge[0];
-                double w = edge[1];
-                if (dist[u] + w < dist[v]) {
-                    dist[v] = dist[u] + w;
-                    prev[v] = u;
+        metrics.startTimer();
+        for (int u : topoOrder) {
+            if (dist[u] == Integer.MAX_VALUE) continue;
+            for (Edge e : dag.get(u)) {
+                metrics.relaxations++;
+                if ((long)dist[u] + e.weight < dist[e.to]) {
+                    dist[e.to] = dist[u] + e.weight;
+                    parent[e.to] = u;
                 }
             }
         }
-        return new DAGPathResult(dist, prev);
-    }
-
-    private static Map<Integer, List<Integer>> convert(Map<Integer, List<int[]>> g) {
-        Map<Integer, List<Integer>> out = new HashMap<>();
-        for (var e : g.entrySet()) {
-            List<Integer> list = new ArrayList<>();
-            for (int[] pair : e.getValue()) list.add(pair[0]);
-            out.put(e.getKey(), list);
-        }
-        return out;
+        metrics.endTimer();
+        return new DAGPathResult(dist, parent);
     }
 }
