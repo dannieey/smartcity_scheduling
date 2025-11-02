@@ -2,11 +2,7 @@ package graph.scc;
 
 import java.util.*;
 
-/**
- * Builds condensation graph (DAG of components).
- * Input: original adjacency (List<List<Integer>>) and compId for each node.
- * Output: adjacency list of condensed graph and mapping node->component.
- */
+
 public class CondensationGraph {
     private final List<List<Integer>> componentAdj;
     private final int[] nodeToComp;
