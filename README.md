@@ -35,6 +35,11 @@ Each dataset simulates Smart City operations such as:
 - Sensor network updates  
 
 
+## Metrics SummarY (all datasets)
+<img width="919" height="526" alt="image" src="https://github.com/user-attachments/assets/a79f11f6-4157-4a8f-849c-17e0c4054522" />
+
+
+
 
 ##  Execution
 
